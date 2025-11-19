@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Event Details - Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">Event: {{ event.name }}</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Back</a>
+    </div>
+
+    <!-- Event Details Card -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <div>
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Event Name</h3>
+                <p style="color: #1f2937; font-size: 16px; font-weight: 600;">{{ event.name }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Event Type</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.event_type or '—' }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Guest Count</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.guest_count }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Event Date</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.event_date.strftime('%d-%m-%Y %H:%M') if event.event_date else '—' }}</p>
+            </div>
+
+            <div>
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Client</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.client.name if event.client else '—' }}</p>
+                <p style="color: #6b7280; font-size: 12px;">{{ event.client.email if event.client else '—' }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Package</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.package.package_type if event.package else '—' }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Venue</h3>
+                <p style="color: #1f2937; font-size: 14px;">{{ event.venue.name if event.venue else '—' }}</p>
+
+                <h3 style="color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-top: 20px; margin-bottom: 8px;">Total Cost</h3>
+                <p style="color: #1f2937; font-size: 16px; font-weight: 700;">₹{{ event.calculate_total_cost()|int }}</p>
+            </div>
+        </div>
+
+        <!-- Current Status & Status Change Section -->
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 30px;">
+            <h2 style="margin-bottom: 20px; color: #1f2937;">Update Event Status</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Current Status -->
+                <div>
+                    <label style="display: block; color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Current Status</label>
+                    <div style="padding: 15px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #6366f1;">
+                        <span style="font-size: 18px; font-weight: 700; color: #1f2937;">
+                            {% if event.status.value == 'PENDING' %}
+                                <span style="color: #f59e0b;">⏳ Pending</span>
+                            {% elif event.status.value == 'APPROVED' %}
+                                <span style="color: #10b981;">✓ Approved</span>
+                            {% elif event.status.value == 'IN_PROGRESS' %}
+                                <span style="color: #3b82f6;">🔄 In Progress</span>
+                            {% elif event.status.value == 'COMPLETED' %}
+                                <span style="color: #8b5cf6;">✓ Completed</span>
+                            {% elif event.status.value == 'CANCELLED' %}
+                                <span style="color: #ef4444;">✗ Cancelled</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Change Status Form -->
+                <div>
+                    <form method="POST" action="{{ url_for('update_event_status', event_id=event.id) }}" style="display: flex; gap: 10px; align-items: flex-end;">
+                        <div style="flex: 1;">
+                            <label style="display: block; color: #6b7280; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Change To</label>
+                            <select name="status" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+                                <option value="">-- Select Status --</option>
+                                <option value="PENDING" {% if event.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
+                                <option value="APPROVED" {% if event.status.value == 'APPROVED' %}selected{% endif %}>Approved</option>
+                                <option value="IN_PROGRESS" {% if event.status.value == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                                <option value="COMPLETED" {% if event.status.value == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                                <option value="CANCELLED" {% if event.status.value == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <button type="submit" style="background: #6366f1; color: white; padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guest List -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2 style="margin-bottom: 20px; color: #1f2937;">Guest List ({{ event.guests|length }} guests)</h2>
+        {% if event.guests %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f9fafb;">
+                    <tr>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Guest Name</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Email</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in event.guests %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 14px;">{{ guest.name }}</td>
+                        <td style="padding: 14px;">{{ guest.email }}</td>
+                        <td style="padding: 14px;">{{ guest.notes or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #6b7280; text-align: center; padding: 40px;">No guests added yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

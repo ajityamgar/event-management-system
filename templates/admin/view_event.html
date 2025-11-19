@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}View Event - EventPro Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1000px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">{{ event.name }}</h1>
+        <a href="{{ url_for('admin_events') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Back to Events</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+        <!-- Main Content -->
+        <div>
+            <!-- Event Details -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h2 style="margin-bottom: 15px; color: #1f2937;">Event Details</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600; width: 40%;">Type</td>
+                        <td style="padding: 10px;">{{ event.event_type }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600;">Date</td>
+                        <td style="padding: 10px;">{{ event.event_date.strftime('%d-%m-%Y') if event.event_date else '—' }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600;">Time</td>
+                        <td style="padding: 10px;">{{ event.event_time or '—' }}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600;">Client</td>
+                        <td style="padding: 10px;">{{ event.client.full_name }} ({{ event.client.email }})</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600;">Expected Guests</td>
+                        <td style="padding: 10px;">{{ event.expected_guest_count }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; color: #6b7280; font-weight: 600;">Total Cost</td>
+                        <td style="padding: 10px; font-weight: 600;">₹{{ event.total_cost|default(0)|int }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Description & Notes -->
+            {% if event.description or event.special_requests %}
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Description & Requests</h3>
+                {% if event.description %}
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 5px;">Description</div>
+                    <p style="color: #4b5563;">{{ event.description }}</p>
+                </div>
+                {% endif %}
+                {% if event.special_requests %}
+                <div>
+                    <div style="font-size: 12px; color: #6b7280; font-weight: 600; margin-bottom: 5px;">Special Requests</div>
+                    <p style="color: #4b5563;">{{ event.special_requests }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Update Status Form -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Update Status</h3>
+                <form method="POST" action="{{ url_for('update_event_status', event_id=event.id) }}">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px;">Status *</label>
+                        <select name="status" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                            <option value="{{ event.status.name }}" selected>{{ event.status.value }}</option>
+                            {% for s in EventStatus %}
+                                {% if s.name != event.status.name %}
+                                <option value="{{ s.name }}">{{ s.value }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px;">Admin Notes</label>
+                        <textarea name="admin_notes" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; min-height: 80px; resize: vertical; box-sizing: border-box;">{{ event.admin_notes or '' }}</textarea>
+                    </div>
+                    <button type="submit" style="background: #6366f1; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Update Status</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Current Status -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Current Status</h3>
+                {% if event.status.value == 'PENDING' %}
+                    <div style="background: #fef3c7; color: #78350f; padding: 15px; border-radius: 6px; font-weight: 600; text-align: center;">
+                        {{ event.status.value }}
+                    </div>
+                {% elif event.status.value == 'APPROVED' %}
+                    <div style="background: #d1fae5; color: #065f46; padding: 15px; border-radius: 6px; font-weight: 600; text-align: center;">
+                        {{ event.status.value }}
+                    </div>
+                {% elif event.status.value == 'COMPLETED' %}
+                    <div style="background: #dbeafe; color: #0c2d6b; padding: 15px; border-radius: 6px; font-weight: 600; text-align: center;">
+                        {{ event.status.value }}
+                    </div>
+                {% elif event.status.value == 'CANCELLED' %}
+                    <div style="background: #fee2e2; color: #7f1d1d; padding: 15px; border-radius: 6px; font-weight: 600; text-align: center;">
+                        {{ event.status.value }}
+                    </div>
+                {% else %}
+                    <div style="background: #e5e7eb; color: #1f2937; padding: 15px; border-radius: 6px; font-weight: 600; text-align: center;">
+                        {{ event.status.value }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Payment Info -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Payment Info</h3>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 12px; color: #6b7280;">Total Cost</div>
+                    <div style="font-size: 18px; font-weight: 700; color: #1f2937;">₹{{ event.total_cost|default(0)|int }}</div>
+                </div>
+                <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
+                    <div style="font-size: 12px; color: #6b7280;">Total Paid</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #10b981;">₹{{ event.get_total_paid()|int }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #6b7280;">Remaining</div>
+                    <div style="font-size: 16px; font-weight: 700; color: #ef4444;">₹{{ event.get_remaining_amount()|int }}</div>
+                </div>
+            </div>
+
+            <!-- Associated Data -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Associated Data</h3>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 12px; color: #6b7280;">Venue</div>
+                    <div style="font-weight: 600;">{{ event.venue.name if event.venue else 'Not Selected' }}</div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 12px; color: #6b7280;">Package</div>
+                    <div style="font-weight: 600;">{{ event.package.name if event.package else 'Not Selected' }}</div>
+                </div>
+                <div>
+                    <div style="font-size: 12px; color: #6b7280;">Guests Added</div>
+                    <div style="font-weight: 600;">{{ event.guests|length }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

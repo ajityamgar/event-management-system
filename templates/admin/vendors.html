@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Manage Vendors - EventPro Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">All Vendors</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Dashboard</a>
+    </div>
+
+    <!-- Vendors Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;">
+        {% for vendor in vendors.items %}
+        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <h3 style="color: #1f2937; font-size: 18px; font-weight: 600; flex: 1;">{{ vendor.name }}</h3>
+                <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; margin-left: 10px;">{{ vendor.vendor_type }}</span>
+            </div>
+
+            {% if vendor.description %}
+            <p style="color: #6b7280; font-size: 13px; margin-bottom: 15px; line-height: 1.5;">{{ vendor.description }}</p>
+            {% endif %}
+
+            <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                {% if vendor.base_price %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
+                    <span style="color: #6b7280; font-size: 12px;">Base Price</span>
+                    <span style="font-weight: 600;">₹{{ vendor.base_price|int }}</span>
+                </div>
+                {% endif %}
+                {% if vendor.hourly_rate %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
+                    <span style="color: #6b7280; font-size: 12px;">Hourly Rate</span>
+                    <span style="font-weight: 600;">₹{{ vendor.hourly_rate|int }}/hr</span>
+                </div>
+                {% endif %}
+                {% if vendor.contact_email %}
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #6b7280; font-size: 12px;">Contact</span>
+                    <span style="font-weight: 600; font-size: 12px;">{{ vendor.contact_email }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button style="flex: 1; background: #6366f1; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Edit</button>
+                <button style="flex: 1; background: #ef4444; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if vendors.pages > 1 %}
+    <div style="margin-top: 40px; text-align: center;">
+        {% if vendors.has_prev %}
+            <a href="{{ url_for('admin_vendors', page=vendors.prev_num) }}" style="padding: 8px 12px; margin: 0 5px;">← Previous</a>
+        {% endif %}
+        
+        <span style="margin: 0 10px;">Page {{ vendors.page }} of {{ vendors.pages }}</span>
+        
+        {% if vendors.has_next %}
+            <a href="{{ url_for('admin_vendors', page=vendors.next_num) }}" style="padding: 8px 12px; margin: 0 5px;">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

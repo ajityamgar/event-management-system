@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Manage Users - EventPro Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">All Users</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Dashboard</a>
+    </div>
+
+    <!-- Filter -->
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <form method="GET" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px;">Filter by Role</label>
+                <select name="role" style="padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+                    <option value="">All Roles</option>
+                    {% for r in roles %}
+                    <option value="{{ r.name }}" {% if selected_role == r.name %}selected{% endif %}>{{ r.value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <button type="submit" style="background: #6366f1; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Filter</button>
+                <a href="{{ url_for('admin_users') }}" style="background: #6b7280; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 600;">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Users Table -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        {% if users.items %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f9fafb;">
+                    <tr>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Username</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Email</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Name</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Role</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Status</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Joined</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 14px; font-weight: 600;">{{ user.username }}</td>
+                        <td style="padding: 14px;">{{ user.email }}</td>
+                        <td style="padding: 14px;">{{ user.full_name }}</td>
+                        <td style="padding: 14px;">
+                            {% if user.is_admin() %}
+                                <span style="background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Admin</span>
+                            {% else %}
+                                <span style="background: #f0fdf4; color: #15803d; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Client</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 14px;">
+                            {% if user.is_active %}
+                                <span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Active</span>
+                            {% else %}
+                                <span style="background: #fee2e2; color: #7f1d1d; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 14px;">{{ user.created_at.strftime('%d-%m-%Y') }}</td>
+                        <td style="padding: 14px;">
+                            {% if user.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('toggle_user_status', user_id=user.id) }}" style="display: inline;">
+                                {% if user.is_active %}
+                                    <button type="submit" style="background: #ef4444; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Deactivate</button>
+                                {% else %}
+                                    <button type="submit" style="background: #10b981; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;">Activate</button>
+                                {% endif %}
+                            </form>
+                            {% else %}
+                                <span style="color: #6b7280; font-size: 12px;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            {% if users.pages > 1 %}
+            <div style="margin-top: 30px; text-align: center;">
+                {% if users.has_prev %}
+                    <a href="{{ url_for('admin_users', page=users.prev_num, role=selected_role) }}" style="padding: 8px 12px; margin: 0 5px;">← Previous</a>
+                {% endif %}
+                
+                <span style="margin: 0 10px;">Page {{ users.page }} of {{ users.pages }}</span>
+                
+                {% if users.has_next %}
+                    <a href="{{ url_for('admin_users', page=users.next_num, role=selected_role) }}" style="padding: 8px 12px; margin: 0 5px;">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <p style="color: #6b7280; text-align: center; padding: 40px;">No users found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

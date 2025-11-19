@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Event Details - EventPro{% endblock %}
+{% block content %}
+<div style="max-width: 1000px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">{{ event.name }}</h1>
+        <a href="{{ url_for('client_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Back to Dashboard</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+        <!-- Main Content -->
+        <div>
+            <!-- Event Details -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h2 style="margin-bottom: 15px; color: #1f2937;">Event Details</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Event Type</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.event_type }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Date</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.event_date.strftime('%d-%m-%Y') if event.event_date else '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Time</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.event_time or '—' }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Expected Guests</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.expected_guest_count }}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Description</div>
+                    <p style="color: #4b5563;">{{ event.description or 'No description provided.' }}</p>
+                </div>
+            </div>
+
+            <!-- Venue Info -->
+            {% if event.venue %}
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h2 style="margin-bottom: 15px; color: #1f2937;">Venue</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Venue Name</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.venue.name }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Capacity</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.venue.capacity }} guests</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Location</div>
+                        <div style="font-weight: 600; color: #1f2937;">{{ event.venue.location }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Rent</div>
+                        <div style="font-weight: 600; color: #1f2937;">₹{{ event.venue.base_rent|int }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Package Info -->
+            {% if event.package %}
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h2 style="margin-bottom: 15px; color: #1f2937;">Package</h2>
+                <div>
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Package Name</div>
+                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 15px;">{{ event.package.name }} ({{ event.package.package_type }})</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 5px;">Base Price</div>
+                    <div style="font-weight: 600; color: #1f2937;">₹{{ event.package.base_price|int }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                {% if event.is_editable %}
+                <a href="{{ url_for('edit_event', event_id=event.id) }}" style="background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Edit Event</a>
+                {% endif %}
+                <a href="{{ url_for('manage_guests', event_id=event.id) }}" style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Manage Guests</a>
+                <a href="{{ url_for('manage_vendors', event_id=event.id) }}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Manage Vendors</a>
+                <a href="{{ url_for('view_payment', event_id=event.id) }}" style="background: #8b5cf6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600;">Payments</a>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Status -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Status</h3>
+                {% if event.status.value == 'PENDING' %}
+                    <div style="background: #fef3c7; color: #78350f; padding: 10px 15px; border-radius: 6px; font-weight: 600;">{{ event.status.value }}</div>
+                {% elif event.status.value == 'APPROVED' %}
+                    <div style="background: #d1fae5; color: #065f46; padding: 10px 15px; border-radius: 6px; font-weight: 600;">{{ event.status.value }}</div>
+                {% elif event.status.value == 'COMPLETED' %}
+                    <div style="background: #dbeafe; color: #0c2d6b; padding: 10px 15px; border-radius: 6px; font-weight: 600;">{{ event.status.value }}</div>
+                {% elif event.status.value == 'CANCELLED' %}
+                    <div style="background: #fee2e2; color: #7f1d1d; padding: 10px 15px; border-radius: 6px; font-weight: 600;">{{ event.status.value }}</div>
+                {% else %}
+                    <div style="background: #e5e7eb; color: #1f2937; padding: 10px 15px; border-radius: 6px; font-weight: 600;">{{ event.status.value }}</div>
+                {% endif %}
+                {% if event.admin_notes %}
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">Admin Notes</div>
+                    <p style="color: #4b5563; font-size: 14px;">{{ event.admin_notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Cost Summary -->
+            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                <h3 style="margin-bottom: 15px; color: #1f2937;">Cost Summary</h3>
+                <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #6b7280;">Total Cost</span>
+                        <span style="font-weight: 600; color: #1f2937;">₹{{ event.total_cost|default(0)|int }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="color: #6b7280;">Paid</span>
+                        <span style="font-weight: 600; color: #10b981;">₹{{ event.get_total_paid()|int }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #6b7280;">Remaining</span>
+                        <span style="font-weight: 600; color: #ef4444;">₹{{ event.get_remaining_amount()|int }}</span>
+                    </div>
+                </div>
+                <a href="{{ url_for('view_payment', event_id=event.id) }}" style="display: block; background: #6366f1; color: white; padding: 10px; text-align: center; text-decoration: none; border-radius: 6px; font-weight: 600;">Make Payment</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

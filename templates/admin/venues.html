@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Manage Venues - EventPro Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">All Venues</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Dashboard</a>
+    </div>
+
+    <!-- Venues Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px;">
+        {% for venue in venues.items %}
+        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h3 style="color: #1f2937; margin-bottom: 10px; font-size: 18px; font-weight: 600;">{{ venue.name }}</h3>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">{{ venue.location }}</p>
+            
+            <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb;">
+                    <span style="color: #6b7280; font-size: 12px;">Capacity</span>
+                    <span style="font-weight: 600;">{{ venue.capacity }} guests</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #6b7280; font-size: 12px;">Base Rent</span>
+                    <span style="font-weight: 600;">₹{{ venue.base_rent|int }}</span>
+                </div>
+            </div>
+
+            {% if venue.description %}
+            <p style="color: #4b5563; font-size: 13px; margin-bottom: 15px; line-height: 1.5;">{{ venue.description }}</p>
+            {% endif %}
+
+            <div style="display: flex; gap: 10px;">
+                <button style="flex: 1; background: #6366f1; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Edit</button>
+                <button style="flex: 1; background: #ef4444; color: white; padding: 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;">Delete</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if venues.pages > 1 %}
+    <div style="margin-top: 40px; text-align: center;">
+        {% if venues.has_prev %}
+            <a href="{{ url_for('admin_venues', page=venues.prev_num) }}" style="padding: 8px 12px; margin: 0 5px;">← Previous</a>
+        {% endif %}
+        
+        <span style="margin: 0 10px;">Page {{ venues.page }} of {{ venues.pages }}</span>
+        
+        {% if venues.has_next %}
+            <a href="{{ url_for('admin_venues', page=venues.next_num) }}" style="padding: 8px 12px; margin: 0 5px;">Next →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

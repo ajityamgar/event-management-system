@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Manage Vendors - EventPro{% endblock %}
+{% block content %}
+<div style="max-width: 1000px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">Manage Vendors - {{ event.name }}</h1>
+        <a href="{{ url_for('view_event', event_id=event.id) }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Back</a>
+    </div>
+
+    <!-- Add Vendor Form -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <h2 style="margin-bottom: 20px; color: #1f2937;">Add Vendor</h2>
+        <form method="POST" action="{{ url_for('add_vendor', event_id=event.id) }}" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Select Vendor *</label>
+                <select name="vendor_id" required style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    <option value="">-- Select Vendor --</option>
+                    {% for vendor in available_vendors %}
+                    <option value="{{ vendor.id }}">{{ vendor.name }} ({{ vendor.vendor_type }}) - ₹{{ vendor.base_price or 0|int }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Quantity</label>
+                <input type="number" name="quantity" value="1" min="1" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Custom Price (Optional)</label>
+                <input type="number" name="custom_price" step="0.01" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px;">Notes</label>
+                <input type="text" name="notes" style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            <div style="grid-column: 1 / -1; display: flex; gap: 10px;">
+                <button type="submit" style="background: #6366f1; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Add Vendor</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Vendor List -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <h2 style="margin-bottom: 20px; color: #1f2937;">Event Vendors</h2>
+        {% if event_vendors %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f9fafb;">
+                    <tr>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Vendor Name</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Type</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Quantity</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Price</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Total</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in event_vendors %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 14px; font-weight: 600;">{{ ev.vendor.name }}</td>
+                        <td style="padding: 14px;">{{ ev.vendor.vendor_type }}</td>
+                        <td style="padding: 14px;">{{ ev.quantity }}</td>
+                        <td style="padding: 14px;">₹{{ ev.custom_price or ev.vendor.base_price or 0|int }}</td>
+                        <td style="padding: 14px; font-weight: 600;">₹{{ ev.total_cost|int }}</td>
+                        <td style="padding: 14px;">
+                            <form method="POST" action="{{ url_for('remove_vendor', event_id=event.id, vendor_id=ev.vendor_id) }}" style="display: inline;">
+                                <button type="submit" style="background: #ef4444; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; cursor: pointer;" onclick="return confirm('Remove vendor?');">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="color: #6b7280; text-align: center; padding: 40px;">No vendors added yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

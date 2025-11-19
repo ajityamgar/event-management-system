@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Manage Events - EventPro Admin{% endblock %}
+{% block content %}
+<div style="max-width: 1200px; margin: 40px auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #1f2937;">All Events</h1>
+        <a href="{{ url_for('admin_dashboard') }}" style="background: #6366f1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px;">← Dashboard</a>
+    </div>
+
+    <!-- Filter -->
+    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <form method="GET" style="display: flex; gap: 15px; flex-wrap: wrap;">
+            <div>
+                <label style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px;">Filter by Status</label>
+                <select name="status" style="padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 14px;">
+                    <option value="">All Statuses</option>
+                    {% for s in statuses %}
+                    <option value="{{ s.name }}" {% if selected_status == s.name %}selected{% endif %}>{{ s.value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end;">
+                <button type="submit" style="background: #6366f1; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">Filter</button>
+                <a href="{{ url_for('admin_events') }}" style="background: #6b7280; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: 600;">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Events Table -->
+    <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        {% if events.items %}
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f9fafb;">
+                    <tr>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Event Name</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Client</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Date</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Guests</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Cost</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Status</th>
+                        <th style="padding: 14px; text-align: left; font-weight: 600; border-bottom: 1px solid #e5e7eb;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events.items %}
+                    <tr style="border-bottom: 1px solid #e5e7eb;">
+                        <td style="padding: 14px;">{{ event.name }}</td>
+                        <td style="padding: 14px;">{{ event.client.full_name }}</td>
+                        <td style="padding: 14px;">{{ event.event_date.strftime('%d-%m-%Y') if event.event_date else '—' }}</td>
+                        <td style="padding: 14px;">{{ event.expected_guest_count }}</td>
+                        <td style="padding: 14px;">₹{{ event.total_cost|default(0)|int }}</td>
+                        <td style="padding: 14px;">
+                            {% if event.status.value == 'PENDING' %}
+                                <span style="background: #fef3c7; color: #78350f; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Pending</span>
+                            {% elif event.status.value == 'APPROVED' %}
+                                <span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Approved</span>
+                            {% elif event.status.value == 'COMPLETED' %}
+                                <span style="background: #dbeafe; color: #0c2d6b; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Completed</span>
+                            {% elif event.status.value == 'CANCELLED' %}
+                                <span style="background: #fee2e2; color: #7f1d1d; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Cancelled</span>
+                            {% else %}
+                                <span style="background: #e5e7eb; color: #1f2937; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">{{ event.status.value }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 14px;">
+                            <a href="{{ url_for('admin_view_event', event_id=event.id) }}" style="color: #6366f1; text-decoration: none; font-weight: 600; font-size: 12px;">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            {% if events.pages > 1 %}
+            <div style="margin-top: 30px; text-align: center;">
+                {% if events.has_prev %}
+                    <a href="{{ url_for('admin_events', page=events.prev_num, status=selected_status) }}" style="padding: 8px 12px; margin: 0 5px;">← Previous</a>
+                {% endif %}
+                
+                <span style="margin: 0 10px;">Page {{ events.page }} of {{ events.pages }}</span>
+                
+                {% if events.has_next %}
+                    <a href="{{ url_for('admin_events', page=events.next_num, status=selected_status) }}" style="padding: 8px 12px; margin: 0 5px;">Next →</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% else %}
+            <p style="color: #6b7280; text-align: center; padding: 40px;">No events found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
