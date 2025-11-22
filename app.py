@@ -9,16 +9,13 @@ from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
-# Import models
+
 from models import (
     db, User, Event, Venue, Package, Vendor, Payment, Guest, EventVendor,
-    AuditLog, UserRole, EventStatus, PaymentStatus
-)
+    AuditLog, UserRole, EventStatus, PaymentStatus )
 
 
 def create_app() -> Flask:
-
-    # Load environment variables
     load_dotenv()
 
     # Initialize Flask app
