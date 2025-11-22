@@ -15,6 +15,11 @@ from models import (
     AuditLog, UserRole, EventStatus, PaymentStatus
 )
 
+
+def create_app():
+    app = Flask(__name__)
+
+       
 # Load environment variables
 load_dotenv()
 
@@ -1156,7 +1161,7 @@ def init_database():
             package = Package(**pkg_data)
             db.session.add(package)
         
-        # Create sample vendors
+        # sample vendors
         vendors_data = [
             {
                 'name': 'Gourmet Catering Co.',
@@ -1197,7 +1202,7 @@ def init_database():
         db.session.commit()
         print("✓ Database initialized successfully!")
         print("  Admin Credentials: Username: Admin, Password: Admin@123")
-
+    return app
 
 # ============================================
 # RUN APPLICATION
