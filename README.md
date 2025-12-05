@@ -35,9 +35,6 @@
 - Username: `Admin`
 - Password: `Admin@123`
 
-### Documentation
-- See `SYSTEM_ARCHITECTURE.md` and `DEPLOYMENT_GUIDE.md` for full details.
-
 ### License
 Provided as-is for business use.
 
